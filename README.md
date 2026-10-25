@@ -1,40 +1,52 @@
-# Persian Information Retrieval
+# Persian search engine
 
-A two-phase text-search project for a Persian document collection. It builds an **inverted index**, supports Boolean retrieval, and adds **TF-IDF and BM25 ranking** in the second phase.
+**A search engine for Persian text, built from the ground up.** Hazm handles the language; the inverted index, Boolean search, TF-IDF and BM25 are written by hand, with no ranking libraries.
 
-**Python · Hazm · inverted indexing · Boolean search · TF-IDF · BM25**
+*Python · Hazm* · Built with Somayeh Heydari · Reports in Persian: [Boolean search](docs/boolean-search-report-fa.pdf) · [Ranked search](docs/ranked-search-report-fa.pdf)
 
-## Project phases
+## What we did
 
-| Folder | Contents |
-| --- | --- |
-| [`01-boolean-search/`](01-boolean-search/) | Persian preprocessing and Boolean retrieval |
-| [`02-ranked-search/`](02-ranked-search/) | The extended engine with TF-IDF and BM25 scores |
-| [`docs/`](docs/) | Original Persian implementation reports |
+- Indexed 100 Persian thesis records (title, abstract and keywords) from IranDoc's Ganj, retrieved for the query «هوش مصنوعی» (artificial intelligence).
+- Preprocessed with Hazm: normalization, tokenization, stopword removal and lemmatization.
+- **Phase 1:** an inverted index with Boolean AND and OR search.
+- **Phase 2:** TF, IDF, TF-IDF and BM25 (k1 = 1.2) implemented by hand, plus an interactive menu to search either way.
 
-Each phase retains its original `Main.py` and local JSON corpus. The small corpus is present in both folders because the independent entry points expect it beside the script.
+## What we found
 
-## Run
+Two queries, two outcomes. On «مسئولیت مدنی» (civil liability), TF-IDF and BM25 agree on the top four documents. On «پزشکی درمان» (medicine, treatment), they don't:
+
+| Rank | TF-IDF | BM25 |
+| ---: | --- | --- |
+| 1 | doc 37 | doc 6 |
+| 2 | doc 3 | doc 33 |
+| 3 | doc 6 | doc 15 |
+| 4 | doc 15 | doc 37 |
+
+- **Length changes the answer.** BM25 discounts long documents, so TF-IDF's first result drops to fourth.
+- **Edge cases behave.** Unknown words and stopword-only queries return nothing, rather than noise.
+
+## Try it
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 
-Push-Location 01-boolean-search
-python Main.py
-Pop-Location
-
 Push-Location 02-ranked-search
 python Main.py
 Pop-Location
 ```
 
-Run one phase at a time and follow its console interaction. Preprocessing uses Hazm normalization, tokenization, stopword removal and lemmatization. The ranking calculations are implemented in the project source.
+The menu offers Boolean AND, Boolean OR, TF-IDF and BM25. Phase 1 runs the same way from `01-boolean-search/`.
 
-## Documentation
+## Layout
 
-- [Boolean-search report in Persian](docs/boolean-search-report-fa.pdf)
-- [Ranked-search report in Persian](docs/ranked-search-report-fa.pdf)
+| Path | What's there |
+| --- | --- |
+| [`01-boolean-search/`](01-boolean-search/) | Preprocessing, inverted index and Boolean search |
+| [`02-ranked-search/`](02-ranked-search/) | The extended engine with TF-IDF and BM25 |
+| [`docs/`](docs/) | Both phase reports, in Persian |
 
-The reports credit **Moeinreza Bagheri and Somayeh Heydari**. This is a university information-retrieval project; course data and implementation reports are retained as project material.
+Each phase keeps its own copy of the corpus beside its script.
+
+Information retrieval course project with Somayeh Heydari, University of Isfahan, 2026.

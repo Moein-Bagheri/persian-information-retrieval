@@ -40,7 +40,9 @@ class BooleanSearchEngine:
         processed_tokens = []
         for token in tokens:
             # حذف علائم نگارشی و استاپ‌وردها
-            if token not in self.stopwords and token.isalnum():
+            # نیم‌فاصله بخشی از کلمه است، پس پیش از isalnum کنار گذاشته می‌شود
+            # (وگرنه کلمه‌هایی مثل «پیش‌بینی» از ایندکس جا می‌ماندند)
+            if token not in self.stopwords and token.replace('\u200c', '').isalnum():
                 # ریشه‌یابی کلمه برای بهبود کیفیت ایندکس
                 lemmatized_token = self.lemmatizer.lemmatize(token)
                 # در هضم، ریشه‌یابی افعال گاهی به فرم "بن‌ماضی#بن‌مضارع" برمی‌گردد.
@@ -139,8 +141,10 @@ class BooleanSearchEngine:
 
         df = len(self.inverted_index[term])
 
+        # «۱ +» داخل لگاریتم، IDF را همیشه مثبت نگه می‌دارد؛ در فرم ساده، واژه‌ای که در بیش از
+        # نیمی از اسناد باشد وزن منفی می‌گیرد و اسنادش از نتایج BM25 حذف می‌شوند
         return math.log(
-            (self.total_docs - df + 0.5) /
+            1 + (self.total_docs - df + 0.5) /
             (df + 0.5)
         )
     def calculate_bm25_score(self, query_terms, doc_id):
@@ -335,50 +339,50 @@ if __name__ == "__main__":
 
     print("\n" + "=" * 50)
     print("Interactive Search")
-while True:
-    query = input("\nEnter your query (type 'exit' to quit): ")
+    while True:
+        query = input("\nEnter your query (type 'exit' to quit): ")
 
-    if query.lower() == "exit":
-        print("Goodbye!")
-        break
+        if query.lower() == "exit":
+            print("Goodbye!")
+            break
 
-    print("\nChoose search method:")
-    print("1. Boolean AND")
-    print("2. Boolean OR")
-    print("3. TF-IDF")
-    print("4. BM25")
+        print("\nChoose search method:")
+        print("1. Boolean AND")
+        print("2. Boolean OR")
+        print("3. TF-IDF")
+        print("4. BM25")
 
-    choice = input("Enter your choice (1-4): ")
+        choice = input("Enter your choice (1-4): ")
 
-    if choice == "1":
-        results = engine.search(query, query_type="AND")
-        engine.display_results(results)
+        if choice == "1":
+            results = engine.search(query, query_type="AND")
+            engine.display_results(results)
 
-    elif choice == "2":
-        results = engine.search(query, query_type="OR")
-        engine.display_results(results)
+        elif choice == "2":
+            results = engine.search(query, query_type="OR")
+            engine.display_results(results)
 
-    elif choice == "3":
-        results = engine.tfidf_search(query)
+        elif choice == "3":
+            results = engine.tfidf_search(query)
 
-        print("\nResults:\n")
+            print("\nResults:\n")
 
-        if not results:
-            print("No documents found.")
+            if not results:
+                print("No documents found.")
+            else:
+                for doc_id, score in results:
+                    print(f"doc_{doc_id}    score: {score:.2f}")
+
+        elif choice == "4":
+            results = engine.bm25_search(query)
+
+            print("\nResults:\n")
+
+            if not results:
+                print("No documents found.")
+            else:
+                for doc_id, score in results:
+                    print(f"doc_{doc_id}    score: {score:.2f}")
+
         else:
-            for doc_id, score in results:
-                print(f"doc_{doc_id}    score: {score:.2f}")
-
-    elif choice == "4":
-        results = engine.bm25_search(query)
-
-        print("\nResults:\n")
-
-        if not results:
-            print("No documents found.")
-        else:
-            for doc_id, score in results:
-                print(f"doc_{doc_id}    score: {score:.2f}")
-
-    else:
-        print("Invalid choice! Please enter a number between 1 and 4.")
+            print("Invalid choice! Please enter a number between 1 and 4.")

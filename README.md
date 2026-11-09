@@ -17,15 +17,19 @@ Two queries, two outcomes. On «مسئولیت مدنی» (civil liability), TF-
 
 | Rank | TF-IDF | BM25 |
 | ---: | --- | --- |
-| 1 | doc 37 | doc 6 |
-| 2 | doc 3 | doc 33 |
-| 3 | doc 6 | doc 15 |
-| 4 | doc 15 | doc 37 |
+| 1 | doc 37 | doc 37 |
+| 2 | doc 3 | doc 6 |
+| 3 | doc 6 | doc 33 |
+| 4 | doc 15 | doc 15 |
 
-- **Length changes the answer.** BM25 discounts long documents, so TF-IDF's first result drops to fourth.
+- **Length changes the answer.** BM25 discounts long documents: TF-IDF's second result, the longest of the four, drops to fifth, and a short record with both words climbs to third.
+- **Textbook BM25 broke on our own topic.** Its IDF turns negative for a word in more than half the documents. «هوش مصنوعی» is in all 100, so BM25 returned nothing for it; adding 1 inside the log keeps the IDF positive.
+- **Half-spaces were getting lost.** The token filter dropped every word with a half-space, like «پیش‌بینی», which is in 22 of the 100 records. 350 such words are back in the index.
 - **Edge cases behave.** Unknown words and stopword-only queries return nothing, rather than noise.
 
 ## Try it
+
+Hazm needs Python 3.12 or 3.13.
 
 ```powershell
 python -m venv .venv

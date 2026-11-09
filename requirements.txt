@@ -1,2 +1,2 @@
-hazm
-tqdm
+hazm==0.12.1
+tqdm==4.70.1

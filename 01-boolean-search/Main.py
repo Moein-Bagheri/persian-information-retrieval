@@ -34,7 +34,9 @@ class BooleanSearchEngine:
         processed_tokens = []
         for token in tokens:
             # حذف علائم نگارشی و استاپ‌وردها
-            if token not in self.stopwords and token.isalnum():
+            # نیم‌فاصله بخشی از کلمه است، پس پیش از isalnum کنار گذاشته می‌شود
+            # (وگرنه کلمه‌هایی مثل «پیش‌بینی» از ایندکس جا می‌ماندند)
+            if token not in self.stopwords and token.replace('\u200c', '').isalnum():
                 # ریشه‌یابی کلمه برای بهبود کیفیت ایندکس
                 lemmatized_token = self.lemmatizer.lemmatize(token)
                 # در هضم، ریشه‌یابی افعال گاهی به فرم "بن‌ماضی#بن‌مضارع" برمی‌گردد.
